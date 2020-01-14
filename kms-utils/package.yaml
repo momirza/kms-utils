@@ -27,6 +27,7 @@ dependencies:
 - bytestring
 - lens
 - base64-bytestring
+- stringsearch
 
 library:
   source-dirs: src

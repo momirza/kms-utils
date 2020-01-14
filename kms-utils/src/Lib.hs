@@ -10,6 +10,8 @@ import           Control.Monad.Trans.AWS
 import           Data.ByteString         hiding ( pack )
 import           Data.ByteString.Base64
 import           Data.ByteString.Builder        ( hPutBuilder )
+import           Data.ByteString.Lazy           ( toStrict )
+import qualified Data.ByteString.Search        as BSS
 import           Data.Conduit
 import qualified Data.Conduit.List             as CL
 import           Data.Monoid
@@ -24,6 +26,7 @@ type PlainText = String
 type KeyAlias = String
 type RawCipherText = ByteString
 type CipherText = ByteString
+type TaggedCipherText = ByteString
 
 enc :: KeyAlias -> PlainText -> IO (Maybe RawCipherText)
 enc ka pt = do
@@ -36,7 +39,7 @@ enc ka pt = do
 encryptPlainText :: PlainText -> KeyAlias -> IO (Maybe CipherText)
 encryptPlainText pt ka = do
     ct <- enc pt ka
-    return $ fmap encode ct
+    return $ fmap (tagCipherText . encode) ct
 
 dec :: RawCipherText -> IO (Maybe ByteString)
 dec ct = do
@@ -47,4 +50,12 @@ dec ct = do
         return $ view drsPlaintext resp
 
 decryptCipherText :: CipherText -> Either String (IO (Maybe ByteString))
-decryptCipherText ct = fmap dec (decode ct)  
+decryptCipherText ct = fmap dec (decode $ untagCipherText ct)
+
+-- Isomorphic tagging
+
+tagCipherText :: CipherText -> TaggedCipherText
+tagCipherText = Data.ByteString.append "kmscrypt::" 
+
+untagCipherText :: TaggedCipherText -> CipherText
+untagCipherText tct =  toStrict $ BSS.replace "kmscrypt::" ("" :: ByteString) tct
