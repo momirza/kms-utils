@@ -5,7 +5,7 @@ import Data.Text
 
 main :: IO ()
 main = do 
-    mct <- encryptPlainText "alias/prod" (Prelude.take 100 $ repeat '1')
+    mct <- encryptPlainText "alias/prod" $ Prelude.replicate 100 '1'
     case mct of 
         Just ct -> do
             print ct
