@@ -18,9 +18,21 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- utf8-string
+- text
+- amazonka
+- amazonka-core
+- amazonka-kms
+- conduit
+- bytestring
+- lens
+- base64-bytestring
 
 library:
   source-dirs: src
+
+default-extensions: 
+  - OverloadedStrings
 
 executables:
   kms-utils:
