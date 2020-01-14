@@ -25,8 +25,8 @@ type KeyAlias = String
 type RawCipherText = ByteString
 type CipherText = ByteString
 
-enc :: PlainText -> KeyAlias -> IO (Maybe RawCipherText)
-enc pt ka = do
+enc :: KeyAlias -> PlainText -> IO (Maybe RawCipherText)
+enc ka pt = do
     env <- newEnv Discover
     let request = encrypt (pack ka) (toBS pt)
     runResourceT $ runAWST env $ within Ireland $ do
@@ -38,5 +38,13 @@ encryptPlainText pt ka = do
     ct <- enc pt ka
     return $ fmap encode ct
 
-decryptCipherText :: CipherText -> IO PlainText
-decryptCipherText = undefined
+dec :: RawCipherText -> IO (Maybe ByteString)
+dec ct = do
+    env <- newEnv Discover
+    let request = decrypt ct
+    runResourceT $ runAWST env $ within Ireland $ do
+        resp <- send request
+        return $ view drsPlaintext resp
+
+decryptCipherText :: CipherText -> Either String (IO (Maybe ByteString))
+decryptCipherText ct = fmap dec (decode ct)  
