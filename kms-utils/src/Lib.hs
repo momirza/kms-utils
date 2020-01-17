@@ -1,6 +1,6 @@
 module Lib
     ( encryptPlainText
-    , decryptCipherText
+    , decryptLine
     )
 where
 
@@ -16,11 +16,13 @@ import           Data.Conduit
 import qualified Data.Conduit.List             as CL
 import           Data.Monoid
 import           Data.Text
-import           Data.Word
+import           Data.Text.Encoding
 import           Network.AWS.Data
 import           Network.AWS.KMS
-import           System.IO
-
+import           Panic
+import           Replace.Megaparsec
+import           Text.Megaparsec
+import           Text.Megaparsec.Char
 
 type PlainText = String
 type KeyAlias = String
@@ -55,7 +57,26 @@ decryptCipherText ct = fmap dec (decode $ untagCipherText ct)
 -- Isomorphic tagging
 
 tagCipherText :: CipherText -> TaggedCipherText
-tagCipherText = Data.ByteString.append "kmscrypt::" 
+tagCipherText = Data.ByteString.append "kmscrypt::"
 
 untagCipherText :: TaggedCipherText -> CipherText
-untagCipherText tct =  toStrict $ BSS.replace "kmscrypt::" ("" :: ByteString) tct
+untagCipherText tct =
+    toStrict $ BSS.replace "kmscrypt::" ("" :: ByteString) tct
+
+decryptCipherTextOrPanic :: Text -> IO Text
+decryptCipherTextOrPanic ct = case decryptCipherText (toBS ct) of
+    Right mpt -> do
+        pt <- mpt
+        case pt of
+            Just _pt -> return $ Data.Text.Encoding.decodeUtf8 _pt
+            Nothing  -> panic "Failed to decrypt"
+    Left _ -> panic "Failed to decrypt"
+
+cipherText = do
+    pre  <- chunk "kmscrypt::"
+    post <- Data.Text.pack
+        <$> some (alphaNumChar <|> char '+' <|> char '/' <|> char '=')
+    return $ Data.Text.append pre post
+
+decryptLine :: Text -> IO Text
+decryptLine = streamEditT cipherText decryptCipherTextOrPanic

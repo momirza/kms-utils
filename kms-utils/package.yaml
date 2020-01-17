@@ -28,6 +28,9 @@ dependencies:
 - lens
 - base64-bytestring
 - stringsearch
+- replace-megaparsec
+- megaparsec
+- ghc
 
 library:
   source-dirs: src

@@ -1,7 +1,8 @@
 module Main where
 
 import Lib
-import Data.Text
+import Data.Text.Encoding
+
 
 main :: IO ()
 main = do 
@@ -9,9 +10,6 @@ main = do
     case mct of 
         Just ct -> do
             print ct
-            case decryptCipherText ct of
-                Left error -> print error
-                Right mpt -> do
-                    pt <- mpt
-                    print pt
+            pt <- decryptLine $ Data.Text.Encoding.decodeUtf8 ct
+            print pt
         Nothing -> putStrLn  "Unable to encrypt"
