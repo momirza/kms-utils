@@ -57,11 +57,11 @@ decryptCipherText ct = fmap dec (decode $ untagCipherText ct)
 -- Isomorphic tagging
 
 tagCipherText :: CipherText -> TaggedCipherText
-tagCipherText = Data.ByteString.append "kmscrypt::"
+tagCipherText = Data.ByteString.append "ciphertext:::"
 
 untagCipherText :: TaggedCipherText -> CipherText
 untagCipherText tct =
-    toStrict $ BSS.replace "kmscrypt::" ("" :: ByteString) tct
+    toStrict $ BSS.replace "ciphertext:::" ("" :: ByteString) tct
 
 decryptCipherTextOrPanic :: Text -> IO Text
 decryptCipherTextOrPanic ct = case decryptCipherText (toBS ct) of
@@ -73,7 +73,7 @@ decryptCipherTextOrPanic ct = case decryptCipherText (toBS ct) of
     Left _ -> panic "Failed to decrypt"
 
 cipherText = do
-    pre  <- chunk "kmscrypt::"
+    pre  <- chunk "ciphertext:::"
     post <- Data.Text.pack
         <$> some (alphaNumChar <|> char '+' <|> char '/' <|> char '=')
     return $ Data.Text.append pre post
