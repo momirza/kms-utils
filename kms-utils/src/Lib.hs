@@ -30,16 +30,16 @@ type RawCipherText = ByteString
 type CipherText = ByteString
 type TaggedCipherText = ByteString
 
-enc :: KeyAlias -> PlainText -> IO (Maybe RawCipherText)
-enc ka pt = do
+enc :: PlainText -> KeyAlias -> IO (Maybe RawCipherText)
+enc pt ka = do
     env <- newEnv Discover
     let request = encrypt (pack ka) (toBS pt)
     runResourceT $ runAWST env $ within Ireland $ do
         resp <- send request
         return $ view ersCiphertextBlob resp
 
-encryptPlainText :: PlainText -> KeyAlias -> IO (Maybe CipherText)
-encryptPlainText pt ka = do
+encryptPlainText ::  KeyAlias -> PlainText -> IO (Maybe CipherText)
+encryptPlainText ka pt = do
     ct <- enc pt ka
     return $ fmap (tagCipherText . encode) ct
 

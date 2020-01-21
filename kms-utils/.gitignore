@@ -2,3 +2,4 @@
 kms-utils.cabal
 *~
 .env
+*.file
