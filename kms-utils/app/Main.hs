@@ -28,17 +28,11 @@ options =
 
 
 opts = subparser
-    (  command
-            "decrypt"
-            (info
-                (pure Decrypt)
-                (fullDesc <> progDesc "CI utils to update variable" <> header
-                    "update-variable - Update a variable in a given file."
-                )
-            )
+    (  command "encrypt"
+               (info options (progDesc "Encrypt plaintext using a KMS key"))
     <> command
-           "encrypt"
-           (info options (progDesc "CI utils to update variable"))
+           "decrypt"
+           (info (pure Decrypt) (progDesc "Decrypt ciphertext from STDIN"))
     )
 
 
