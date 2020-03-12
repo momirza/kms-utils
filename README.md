@@ -1,4 +1,13 @@
-# Usage
+# kms-utils
+
+A wrapper over [AWS KMS](https://aws.amazon.com/kms/).
+
+## Installation
+
+Download relevant binary  from the [releases page](https://github.com/momirza/kms-utils/releases)
+and add to `PATH`.
+
+## Usage
 
 ```
 Usage: kms-utils COMMAND
