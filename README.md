@@ -21,3 +21,7 @@ Available commands:
                              
   decrypt                  Decrypt ciphertext from STDIN
 ```
+
+## Notes
+
+- For compiling on macos remove `ld-options: -static` from `package.yaml`
