@@ -1,6 +1,7 @@
 module Lib
     ( encryptPlainText
     , decryptLine
+    , reEncryptLine
     )
 where
 
@@ -11,6 +12,7 @@ import           Data.ByteString         hiding ( pack )
 import           Data.ByteString.Base64
 import           Data.ByteString.Builder        ( hPutBuilder )
 import           Data.ByteString.Lazy           ( toStrict )
+import           Data.ByteString.Char8           ( unpack )
 import qualified Data.ByteString.Search        as BSS
 import           Data.Conduit
 import qualified Data.Conduit.List             as CL
@@ -72,6 +74,19 @@ decryptCipherTextOrPanic ct = case decryptCipherText (toBS ct) of
             Nothing  -> panic "Failed to decrypt"
     Left _ -> panic "Failed to decrypt"
 
+reEncryptCipherTextOrPanic :: KeyAlias -> Text -> IO Text
+reEncryptCipherTextOrPanic ka ct = case decryptCipherText (toBS ct) of
+    Right mpt -> do
+        pt <- mpt
+        case pt of
+            Just _pt -> do
+                mct <- encryptPlainText ka (Data.ByteString.Char8.unpack _pt)
+                case mct of
+                    Just ct -> return $ Data.Text.Encoding.decodeUtf8 ct
+                    Nothing -> panic "Failed to encrypt"
+            Nothing  -> panic "Failed to decrypt"
+    Left _ -> panic "Failed to decrypt"
+
 cipherText = do
     pre  <- chunk "ciphertext:::"
     post <- Data.Text.pack
@@ -80,3 +95,6 @@ cipherText = do
 
 decryptLine :: Text -> IO Text
 decryptLine = streamEditT cipherText decryptCipherTextOrPanic
+
+reEncryptLine :: KeyAlias -> Text -> IO Text
+reEncryptLine ka = streamEditT cipherText ( reEncryptCipherTextOrPanic ka)
