@@ -11,7 +11,10 @@ import           Options.Applicative
 data Options = Encrypt {
     keyAlias :: String,
     plainText :: String
-} | Decrypt deriving Show
+} | Decrypt 
+  | ReEncrypt {
+      keyAlias:: String
+  } deriving Show
 
 
 options :: Parser Options
@@ -26,6 +29,16 @@ options =
                     "Plaintext to encrypt"
                 )
 
+optionsReEncrypt :: Parser Options
+optionsReEncrypt =
+    ReEncrypt
+        <$> strOption
+                (long "key-alias" <> metavar "key_alias" <> help
+                    "Key alias in kms to use to encrypt. alias/{key_alis}"
+                )
+
+
+
 
 opts = subparser
     (  command "encrypt"
@@ -33,6 +46,9 @@ opts = subparser
     <> command
            "decrypt"
            (info (pure Decrypt) (progDesc "Decrypt ciphertext from STDIN"))
+    <> command
+           "re-encrypt"
+           (info optionsReEncrypt (progDesc "Re-encrypt ciphertext from STDIN"))
     )
 
 
@@ -42,11 +58,18 @@ decryptStdin = do
     pt    <- decryptLine (pack input)
     putStr $ unpack pt
 
+reEncryptStdin :: String -> IO ()
+reEncryptStdin ka = do
+    input <- getContents
+    pt    <- reEncryptLine ka (pack input)
+    putStr $ unpack pt
+
 run :: Options -> IO ()
 run Decrypt         = decryptStdin
 run (Encrypt ka pt) = do
     ct <- encryptPlainText ("alias/" ++ ka) pt
     putStr $ unpack $ Data.Text.Encoding.decodeUtf8 $ fromJust ct
+run (ReEncrypt ka)  = reEncryptStdin ("alias/" ++ ka)
 
 main :: IO ()
 main = execParser (info (opts <**> helper) idm) >>= run
