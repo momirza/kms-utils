@@ -1,18 +1,18 @@
-use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_kms::types::Blob;
-use aws_sdk_kms::Client;
+use aws_sdk_kms::{Client, Region};
 
-const DEFAULT_REGION: &str = "eu-west-1";
-
-async fn get_client(region: &'static str) -> Client {
-    let region_provider = RegionProviderChain::default_provider().or_else(region);
-    let shared_config = aws_config::from_env().region(region_provider).load().await;
+async fn get_client(region: &str) -> Client {
+    let shared_config = aws_config::from_env()
+        .region(Region::new(region.to_string()))
+        .load()
+        .await;
     Client::new(&shared_config)
 }
 
 #[tokio::main]
-pub async fn decrypt(ciphertext: &str) -> String {
-    let client = get_client(DEFAULT_REGION).await;
+pub async fn decrypt(ciphertext: &str, region: &str) -> String {
+    let client = get_client(region).await;
+
     let decoded = base64::decode(ciphertext).unwrap();
     let resp = client
         .decrypt()
@@ -28,8 +28,8 @@ pub async fn decrypt(ciphertext: &str) -> String {
 }
 
 #[tokio::main]
-pub async fn encrypt(key_id: &String, plaintext: &String) -> String {
-    let client = get_client(DEFAULT_REGION).await;
+pub async fn encrypt(key_id: &String, plaintext: &String, region: &str) -> String {
+    let client = get_client(region).await;
 
     let plaintext_blob = Blob::new(plaintext.as_bytes());
     let resp = client
