@@ -34,7 +34,7 @@ pub async fn encrypt(key_id: &String, plaintext: &String, region: &str) -> Strin
     let plaintext_blob = Blob::new(plaintext.as_bytes());
     let resp = client
         .encrypt()
-        .key_id(format!("alias/cmk-{key_id}"))
+        .key_id(format!("alias/{key_id}"))
         .plaintext(plaintext_blob)
         .send()
         .await
