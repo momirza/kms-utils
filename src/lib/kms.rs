@@ -1,9 +1,8 @@
 use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_kms::types::Blob;
 use aws_sdk_kms::Client;
-use base64;
 
-const DEFAULT_REGION: &'static str = "eu-west-1";
+const DEFAULT_REGION: &str = "eu-west-1";
 
 async fn get_client(region: &'static str) -> Client {
     let region_provider = RegionProviderChain::default_provider().or_else(region);
@@ -25,8 +24,7 @@ pub async fn decrypt(ciphertext: &str) -> String {
     let inner = resp.plaintext.unwrap();
     let bytes = inner.as_ref();
 
-    let s = String::from_utf8(bytes.to_vec()).expect("Could not convert to UTF-8");
-    s
+    String::from_utf8(bytes.to_vec()).expect("Could not convert to UTF-8")
 }
 
 #[tokio::main]
@@ -45,6 +43,5 @@ pub async fn encrypt(key_id: &String, plaintext: &String) -> String {
     let blob = resp.ciphertext_blob.expect("Could not get encrypted text");
     let bytes = blob.as_ref();
 
-    let s = base64::encode(&bytes);
-    s
+    base64::encode(&bytes)
 }
