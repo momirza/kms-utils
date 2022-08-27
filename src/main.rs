@@ -1,6 +1,6 @@
 mod lib;
 
-use lib::{encrypt, decrypt};
+use lib::{decrypt, encrypt};
 
 use clap::{Parser, Subcommand};
 
@@ -30,11 +30,10 @@ fn main() {
     // You can check for the existence of subcommands, and if found use their
     // matches just as you would the top level cmd
     match &cli.command {
-        Commands::Encrypt { key_alias, plaintext } => {
-            encrypt(key_alias, plaintext)
-        }
-        Commands::Decrypt {} => {
-            decrypt()
-        }
+        Commands::Encrypt {
+            key_alias,
+            plaintext,
+        } => encrypt(key_alias, plaintext),
+        Commands::Decrypt {} => decrypt(),
     }
 }
