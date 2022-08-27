@@ -25,6 +25,32 @@ SUBCOMMANDS:
     help       Print this message or the help of the given subcommand(s)
 ```
 
-## Notes
+### Encrypt
 
-- For compiling on macos remove `ld-options: -static` from `package.yaml`
+```
+Encrypt plaintext using a KMS key
+
+USAGE:
+    kms-utils encrypt --key-alias <KEY_ALIAS> --plaintext <PLAINTEXT>
+
+OPTIONS:
+    -h, --help                     Print help information
+    -k, --key-alias <KEY_ALIAS>
+    -p, --plaintext <PLAINTEXT>
+    -V, --version                  Print version information
+```
+
+#### Example
+
+```console
+kms-utils encrypt --key-alias prod --plaintext foo
+```
+
+### Decrypt
+
+#### Example
+
+```console
+echo "ciphertext:::..." | kms-utils decrypt 
+```
+
